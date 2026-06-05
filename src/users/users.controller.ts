@@ -64,6 +64,7 @@ export class UsersController {
   @ApiOkResponse({ description: 'Usuario eliminado correctamente' })
   @ApiNotFoundResponse({ description: 'Usuario no encontrado' })
   deleteUser(@Param('id', ParseIntPipe) id: number) {
+    console.log(id);
     return this.usersService.deleteUser(id);
   }
 
