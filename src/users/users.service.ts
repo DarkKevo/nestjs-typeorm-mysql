@@ -6,6 +6,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { UpdateUserDTO } from './dto/update-user.dto';
 import { CreateProfileDTO } from './dto/create-profile.dto';
 import { Profile } from 'src/profile.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -30,6 +31,18 @@ export class UsersService {
     return userFound;
   }
 
+  async findByUsername(username: string) {
+    const userFound = await this.userRepository.findOne({
+      where: { username },
+    });
+
+    if (!userFound) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return userFound;
+  }
+
   async createUser(user: CreateUserDTO) {
     const userFound = await this.userRepository.findOne({
       where: { username: user.username },
@@ -39,7 +52,8 @@ export class UsersService {
       throw new HttpException('User Already Exists', HttpStatus.CONFLICT);
     }
 
-    const newUser = this.userRepository.create(user);
+    const hashed = await bcrypt.hash(user.password, 10);
+    const newUser = this.userRepository.create({ ...user, password: hashed });
     return this.userRepository.save(newUser);
   }
 
